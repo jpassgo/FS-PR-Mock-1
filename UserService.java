@@ -24,20 +24,21 @@ public class UserService {
 
     private final UserRepository userRepo;
     private final AuditRepository auditRepo;
-    private final PasswordEncoder encoder;
+    private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepo,
                        AuditRepository auditRepo,
-                       PasswordEncoder encoder) {
+                       PasswordEncoder passwordEncoder) {
         this.userRepo  = userRepo;
         this.auditRepo = auditRepo;
-        this.encoder   = encoder;
+        this.passwordEncoder = passwordEncoder;
     }
-
+    
+    @Transactional
     public void createUser(CreateUserRequest request) {
         User user = new User();
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepo.save(user);
 
         AuditLog log = new AuditLog("USER_CREATED", user.getId());
