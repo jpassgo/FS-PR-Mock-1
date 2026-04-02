@@ -22,20 +22,22 @@ import java.util.List;
 @RequestMapping("/api/orders")
 public class OrderController {
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @GetMapping("/{customerId}/summary")
-    public ResponseEntity<OrderSummaryDto> getOrderSummary(
-            @PathVariable Long customerId) {
+    public ResponseEntity<OrderSummaryDto> getOrderSummary(@PathVariable Long customerId) {
 
         List<Order> orders = orderService.findByCustomerId(customerId);
 
-        double total = 0;
+        BigDecimal total = 0;
         for (Order order : orders) {
             List<OrderItem> items = orderService.findItemsByOrderId(order.getId());
             total += items.stream()
-                          .mapToDouble(OrderItem::getPrice)
+                          .map((item) -> new BigDecimal(item.getPrice()))
                           .sum();
         }
 
